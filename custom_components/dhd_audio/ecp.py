@@ -220,6 +220,15 @@ class DHDClient:
             return
         except Exception:
             _LOGGER.exception("Listener loop crashed")
+        finally:
+            # Mark connection as dead so coordinator can reconnect.
+            if self._writer is not None:
+                try:
+                    self._writer.close()
+                except OSError:
+                    pass
+                self._writer = None
+                self._reader = None
 
     # ------------------------------------------------------------------
     # Low-level protocol helpers

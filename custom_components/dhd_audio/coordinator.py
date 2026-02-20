@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -21,8 +22,7 @@ from .ecp import DHDClient, DHDConnectionError, DHDProtocolError
 
 _LOGGER = logging.getLogger(__name__)
 
-# No periodic polling needed — the mixer pushes all state changes.
-# Initial state is fetched once at startup.
+POLL_INTERVAL = timedelta(seconds=10)
 
 
 class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
@@ -32,7 +32,8 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
     state-change notifications via a callback.  This coordinator
     updates ``self.data`` instantly and notifies all entities.
 
-    No periodic polling — the mixer pushes all changes instantly.
+    A 10-second poll interval ensures automatic reconnection when the
+    mixer has been powered off and comes back online.
     """
 
     config_entry: ConfigEntry
@@ -48,7 +49,7 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=None,
+            update_interval=POLL_INTERVAL,
         )
         self.client = client
         self.config_entry = entry
@@ -84,11 +85,27 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
         self.async_set_updated_data(self.data)
 
     async def _async_update_data(self) -> dict[int, bool]:
-        """Fetch the current state of all configured logics (fallback poll)."""
+        """Fetch the current state of all configured logics.
+
+        Called every 10 seconds.  If the connection is down, attempts
+        to reconnect before querying.
+        """
         logic_ids = self._get_logic_ids()
 
         if not logic_ids:
             return {}
+
+        # Reconnect if the connection was lost.
+        if not self.client.connected:
+            _LOGGER.debug("Connection lost, attempting reconnect...")
+            try:
+                await self.client.disconnect()
+                await self.client.connect()
+                _LOGGER.info("Reconnected to DHD mixer")
+            except (DHDConnectionError, OSError, TimeoutError) as err:
+                raise UpdateFailed(
+                    f"Cannot reconnect to DHD mixer: {err}"
+                ) from err
 
         states: dict[int, bool] = {}
 
@@ -96,7 +113,6 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
             for logic_id in logic_ids:
                 states[logic_id] = await self.client.get_logic_state(logic_id)
         except DHDConnectionError as err:
-            # Try to reconnect on next poll.
             await self.client.disconnect()
             raise UpdateFailed(
                 f"Lost connection to DHD mixer: {err}"
