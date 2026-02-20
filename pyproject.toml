@@ -1,0 +1,24 @@
+[project]
+name = "ha-dhd-audio"
+version = "1.0.0"
+description = "HA DHD Audio – Home Assistant integration for DHD audio mixing consoles"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

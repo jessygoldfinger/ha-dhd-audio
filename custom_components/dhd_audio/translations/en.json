@@ -1,0 +1,78 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up HA DHD Audio",
+        "description": "Connect to your DHD mixer and add your first logic. You can add more logics later via Options.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "logic_id": "Logic ID",
+          "name": "Logic name",
+          "entity_type": "Entity type"
+        },
+        "data_description": {
+          "logic_id": "The logic number from DHD Toolbox. For RM5200: View → Audio and Logic IDs View → use Base/Addr column. For RM4200D: Logic Sources window (F5).",
+          "name": "A friendly name for this logic (e.g. 'Studio Mic Live').",
+          "entity_type": "'switch' = read/write, 'sensor' = read-only."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the DHD mixer. Check the IP address and port.",
+      "logic_already_configured": "This logic ID is already configured."
+    },
+    "abort": {
+      "already_configured": "This DHD mixer is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Manage Logics",
+        "description": "You have {count} logic(s) configured.",
+        "data": {
+          "action": "Action"
+        }
+      },
+      "add_logic": {
+        "title": "Add Logic",
+        "data": {
+          "logic_id": "Logic ID",
+          "name": "Logic name",
+          "entity_type": "Entity type"
+        },
+        "data_description": {
+          "logic_id": "The logic number from DHD Toolbox. For RM5200: View → Audio and Logic IDs View → use Base/Addr column. For RM4200D: Logic Sources window (F5).",
+          "name": "A friendly name for this logic.",
+          "entity_type": "'switch' = read/write, 'sensor' = read-only."
+        }
+      },
+      "edit_logic": {
+        "title": "Edit Logic",
+        "description": "Select the logic to edit.",
+        "data": {
+          "edit_logic_id": "Logic"
+        }
+      },
+      "edit_logic_detail": {
+        "title": "Edit Logic",
+        "data": {
+          "logic_id": "Logic ID",
+          "name": "Logic name",
+          "entity_type": "Entity type"
+        }
+      },
+      "remove_logic": {
+        "title": "Remove Logic",
+        "description": "Select the logic to remove.",
+        "data": {
+          "remove_logic_id": "Logic"
+        }
+      }
+    },
+    "error": {
+      "logic_already_configured": "This logic ID is already configured."
+    }
+  }
+}

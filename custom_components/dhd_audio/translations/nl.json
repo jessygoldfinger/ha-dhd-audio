@@ -1,0 +1,78 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HA DHD Audio instellen",
+        "description": "Verbind met je DHD-mixer en voeg je eerste logic toe. Meer logics kun je later toevoegen via Opties.",
+        "data": {
+          "host": "Host",
+          "port": "Poort",
+          "logic_id": "Logic-ID",
+          "name": "Logicnaam",
+          "entity_type": "Entiteitstype"
+        },
+        "data_description": {
+          "logic_id": "Het logicnummer uit DHD Toolbox. Voor RM5200: View → Audio and Logic IDs View → gebruik Base/Addr kolom. Voor RM4200D: Logic Sources venster (F5).",
+          "name": "Een beschrijvende naam (bijv. 'Studio Mic Live').",
+          "entity_type": "'switch' = lezen/schrijven, 'sensor' = alleen lezen."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan niet verbinden met de DHD-mixer. Controleer IP-adres en poort.",
+      "logic_already_configured": "Dit logic-ID is al geconfigureerd."
+    },
+    "abort": {
+      "already_configured": "Deze DHD-mixer is al geconfigureerd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Logics beheren",
+        "description": "Je hebt {count} logic(s) geconfigureerd.",
+        "data": {
+          "action": "Actie"
+        }
+      },
+      "add_logic": {
+        "title": "Logic toevoegen",
+        "data": {
+          "logic_id": "Logic-ID",
+          "name": "Logicnaam",
+          "entity_type": "Entiteitstype"
+        },
+        "data_description": {
+          "logic_id": "Het logicnummer uit DHD Toolbox. Voor RM5200: View → Audio and Logic IDs View → gebruik Base/Addr kolom. Voor RM4200D: Logic Sources venster (F5).",
+          "name": "Een beschrijvende naam voor deze logic.",
+          "entity_type": "'switch' = lezen/schrijven, 'sensor' = alleen lezen."
+        }
+      },
+      "edit_logic": {
+        "title": "Logic wijzigen",
+        "description": "Selecteer de logic die je wilt wijzigen.",
+        "data": {
+          "edit_logic_id": "Logic"
+        }
+      },
+      "edit_logic_detail": {
+        "title": "Logic wijzigen",
+        "data": {
+          "logic_id": "Logic-ID",
+          "name": "Logicnaam",
+          "entity_type": "Entiteitstype"
+        }
+      },
+      "remove_logic": {
+        "title": "Logic verwijderen",
+        "description": "Selecteer de logic die je wilt verwijderen.",
+        "data": {
+          "remove_logic_id": "Logic"
+        }
+      }
+    },
+    "error": {
+      "logic_already_configured": "Dit logic-ID is al geconfigureerd."
+    }
+  }
+}

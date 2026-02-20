@@ -1,0 +1,10 @@
+{
+  "domain": "dhd_audio",
+  "name": "HA DHD Audio",
+  "codeowners": ["@jessygoldfinger"],
+  "config_flow": true,
+  "documentation": "https://github.com/jessygoldfinger/ha-dhd-audio",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/jessygoldfinger/ha-dhd-audio/issues",
+  "version": "1.0.0"
+}
