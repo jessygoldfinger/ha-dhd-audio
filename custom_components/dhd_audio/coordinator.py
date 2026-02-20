@@ -53,6 +53,7 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
         )
         self.client = client
         self.config_entry = entry
+        self._was_available = True
 
         # Register the push callback on the ECP client.
         self.client.set_logic_callback(self._handle_logic_push)
@@ -88,7 +89,8 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
         """Fetch the current state of all configured logics.
 
         Called every 10 seconds.  If the connection is down, attempts
-        to reconnect before querying.
+        to reconnect silently.  Only logs once on disconnect and once
+        on reconnect to avoid flooding the log during long outages.
         """
         logic_ids = self._get_logic_ids()
 
@@ -97,29 +99,38 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
 
         # Reconnect if the connection was lost.
         if not self.client.connected:
-            _LOGGER.debug("Connection lost, attempting reconnect...")
+            if self._was_available:
+                _LOGGER.warning("DHD mixer disconnected, will retry silently")
+                self._was_available = False
+
             try:
                 await self.client.disconnect()
                 await self.client.connect()
-                _LOGGER.info("Reconnected to DHD mixer")
-            except (DHDConnectionError, OSError, TimeoutError) as err:
-                raise UpdateFailed(
-                    f"Cannot reconnect to DHD mixer: {err}"
-                ) from err
+            except (DHDConnectionError, OSError, TimeoutError):
+                # Silently retry on next poll — no log spam.
+                return self.data or {}
+
+            # Reconnected!
+            self._was_available = True
+            _LOGGER.info("Reconnected to DHD mixer")
 
         states: dict[int, bool] = {}
 
         try:
             for logic_id in logic_ids:
                 states[logic_id] = await self.client.get_logic_state(logic_id)
-        except DHDConnectionError as err:
+        except DHDConnectionError:
+            if self._was_available:
+                _LOGGER.warning("DHD mixer connection lost during poll")
+                self._was_available = False
             await self.client.disconnect()
-            raise UpdateFailed(
-                f"Lost connection to DHD mixer: {err}"
-            ) from err
+            return self.data or {}
         except DHDProtocolError as err:
-            raise UpdateFailed(
-                f"Protocol error from DHD mixer: {err}"
-            ) from err
+            _LOGGER.debug("Protocol error: %s", err)
+            return self.data or {}
+
+        if not self._was_available:
+            self._was_available = True
+            _LOGGER.info("DHD mixer connection restored")
 
         return states
