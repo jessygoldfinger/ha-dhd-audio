@@ -53,7 +53,7 @@ class DHDCoordinator(DataUpdateCoordinator[dict[int, bool]]):
         )
         self.client = client
         self.config_entry = entry
-        self._was_available = True
+        self._was_available = client.connected
 
         # Register the push callback on the ECP client.
         self.client.set_logic_callback(self._handle_logic_push)

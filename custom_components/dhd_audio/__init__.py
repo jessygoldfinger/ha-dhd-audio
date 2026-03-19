@@ -7,11 +7,10 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import DOMAIN
 from .coordinator import DHDCoordinator
-from .ecp import DHDClient
+from .ecp import DHDClient, DHDConnectionError
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,10 +26,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     try:
         await client.connect()
-    except (OSError, TimeoutError) as err:
-        raise ConfigEntryNotReady(
-            f"Unable to connect to DHD mixer at {host}:{port}"
-        ) from err
+    except (OSError, TimeoutError, DHDConnectionError):
+        _LOGGER.debug(
+            "DHD mixer at %s:%s is offline at startup, will retry in background",
+            host,
+            port,
+        )
 
     coordinator = DHDCoordinator(hass, client, entry)
     await coordinator.async_config_entry_first_refresh()
